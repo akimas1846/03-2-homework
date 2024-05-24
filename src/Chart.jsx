@@ -9,6 +9,7 @@ function Chart({ data }) {
   const contentWidth = 400;
   const contentHeight = 400;
 
+  //console.log(data);
   // 色のスケールを設定
   const color = d3.scaleOrdinal(d3.schemeCategory10);
 

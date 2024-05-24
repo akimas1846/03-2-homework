@@ -3,12 +3,20 @@ import Chart from "./Chart";
 
 function App() {
   const [data, setData] = useState(null);
-
   useEffect(() => {
-    fetch("https://s3-us-west-2.amazonaws.com/s.cdpn.io/2004014/iris.json")
-      .then((response) => response.json())
-      .then((data) => setData(data));
+    (async () => {
+      const fetchData = await fetch(
+        "https://s3-us-west-2.amazonaws.com/s.cdpn.io/2004014/iris.json"
+      );
+      const jsData = await fetchData.json();
+      setData(jsData);
+    })();
   }, []);
+  if (!data) {
+    return <div>Loading...</div>;
+  }
+  console.log(data);
+
   // const data = [
   //   {
   //     sepalLength: 5.1,
