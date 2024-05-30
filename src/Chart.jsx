@@ -11,53 +11,62 @@ function Chart({ data, xAxisAttribute, yAxisAttribute }) {
 
   const color = d3.scaleOrdinal(d3.schemeCategory10);
   const [hiddenSeries, setHiddenSeries] = useState({});
+  const [xAxisLabel, setXAxisLabel] = useState(xAxisAttribute);
+  const [yAxisLabel, setYAxisLabel] = useState(yAxisAttribute);
 
   const toggleSeries = (series) => {
-    const updatedHiddenSeries = { ...hiddenSeries, [series]: !hiddenSeries[series] };
+    const updatedHiddenSeries = {
+      ...hiddenSeries,
+      [series]: !hiddenSeries[series],
+    };
     setHiddenSeries(updatedHiddenSeries);
   };
 
   useEffect(() => {
     const xScale = d3
       .scaleLinear()
-      .domain([d3.min(data, (item) => item[xAxisAttribute]), d3.max(data, (item) => item[xAxisAttribute])])
+      .domain([
+        d3.min(data, (item) => item[xAxisAttribute]),
+        d3.max(data, (item) => item[xAxisAttribute]),
+      ])
       .range([0, contentWidth])
       .nice();
 
     const yScale = d3
       .scaleLinear()
-      .domain([d3.min(data, (item) => item[yAxisAttribute]), d3.max(data, (item) => item[yAxisAttribute])])
+      .domain([
+        d3.min(data, (item) => item[yAxisAttribute]),
+        d3.max(data, (item) => item[yAxisAttribute]),
+      ])
       .range([contentHeight, 0])
       .nice();
 
     const xAxis = d3.axisBottom(xScale);
     const yAxis = d3.axisLeft(yScale);
 
-    d3.select(".x-axis")
-      .transition().duration(1000)
-      .call(xAxis);
+    d3.select(".x-axis").transition().duration(1000).call(xAxis);
+    d3.select(".y-axis").transition().duration(1000).call(yAxis);
 
-    d3.select(".y-axis")
-      .transition().duration(1000)
-      .call(yAxis);
+    setXAxisLabel(xAxisAttribute);
+    setYAxisLabel(yAxisAttribute);
 
-    const circles = d3.select(".circles")
-      .selectAll("circle")
-      .data(data);
+    const circles = d3.select(".circles").selectAll("circle").data(data);
 
-    circles.enter().append("circle")
+    circles
+      .enter()
+      .append("circle")
       .attr("cx", (d) => xScale(d[xAxisAttribute]))
       .attr("cy", (d) => yScale(d[yAxisAttribute]))
       .attr("r", 5)
       .attr("fill", (d) => color(d.species))
-      .style("display", (d) => hiddenSeries[d.species] ? "none" : "initial")
+      .style("display", (d) => (hiddenSeries[d.species] ? "none" : "initial"))
       .merge(circles)
-      .transition().duration(1000)
+      .transition()
+      .duration(1000)
       .attr("cx", (d) => xScale(d[xAxisAttribute]))
       .attr("cy", (d) => yScale(d[yAxisAttribute]));
 
     circles.exit().remove();
-
   }, [data, xAxisAttribute, yAxisAttribute, hiddenSeries]);
 
   const svgWidth = margin.left + contentWidth + margin.right + legendWidth;
@@ -76,7 +85,9 @@ function Chart({ data, xAxisAttribute, yAxisAttribute }) {
               cy={0}
               r={5}
               fill={color(item.species)}
-              style={{ display: hiddenSeries[item.species] ? "none" : "initial" }}
+              style={{
+                display: hiddenSeries[item.species] ? "none" : "initial",
+              }}
             />
           ))}
         </g>
@@ -85,7 +96,9 @@ function Chart({ data, xAxisAttribute, yAxisAttribute }) {
             <g
               key={i}
               onClick={() => toggleSeries(d)}
-              transform={`translate(0, ${i * (legendItemSize + legendItemSpacing)})`}
+              transform={`translate(0, ${
+                i * (legendItemSize + legendItemSpacing)
+              })`}
               style={{ cursor: "pointer" }}
             >
               <rect
@@ -101,6 +114,20 @@ function Chart({ data, xAxisAttribute, yAxisAttribute }) {
             </g>
           ))}
         </g>
+        <text
+          transform={`translate(${contentWidth / 2},${contentHeight + 40})`}
+          textAnchor="middle"
+          fontSize="14"
+        >
+          {xAxisLabel}
+        </text>
+        <text
+          transform={`translate(${-margin.left + 20},${contentHeight / 2}) rotate(-90)`}
+          textAnchor="middle"
+          fontSize="14"
+        >
+          {yAxisLabel}
+        </text>
       </g>
     </svg>
   );
